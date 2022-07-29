@@ -11,5 +11,9 @@
     "nuxt": "3.0.0-rc.6",
     "postcss": "^8.4.14",
     "tailwindcss": "^3.1.6"
+  },
+  "dependencies": {
+    "@types/luxon": "^3.0.0",
+    "luxon": "^3.0.1"
   }
 }
