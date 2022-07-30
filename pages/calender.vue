@@ -1,13 +1,13 @@
 <script setup>
 import { DateTime } from "luxon";
 
-const now = ref(DateTime.local());
-const displayDate = ref(now.value.toFormat('yyyy年M月'))
-const currentMonth = now.value.toFormat('YYYY-MM')
+const currentDate = ref(DateTime.local());
+const displayDate = ref(currentDate.value.toFormat('yyyy年M月'))
+const currentMonth = currentDate.value.toFormat('YYYY-MM')
 const youbi = ["日", "月", "火", "水", "木", "金", "土"]
 
 const startDate = computed(() => {
-  const newDt = now.value.startOf("month")
+  const newDt = currentDate.value.startOf("month")
   const youbiNum = newDt.weekday
   return newDt.minus({
     days: youbiNum
@@ -15,7 +15,7 @@ const startDate = computed(() => {
 });
 
 const endDate = computed(() => {
-  const endDt = now.value.endOf("month")
+  const endDt = currentDate.value.endOf("month")
   let youbiNum = endDt.weekday
   youbiNum == 7 ? youbiNum = 0 : youbiNum = youbiNum
   
@@ -43,8 +43,8 @@ const calenders = computed(() => {
   return calendars;
 });
 
-const prevMonth = () => now.value = now.value.minus({ months: 1})
-const nextMonth = () => now.value = now.value.plus({ months: 1})
+const prevMonth = () => currentDate.value = currentDate.value.minus({ months: 1})
+const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
 </script>
 
 <template>
