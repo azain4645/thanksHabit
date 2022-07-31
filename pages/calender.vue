@@ -2,8 +2,8 @@
 import { DateTime } from "luxon";
 
 const currentDate = ref(DateTime.local());
-const displayDate = ref(currentDate.value.toFormat('yyyy年M月'))
-const currentMonth = currentDate.value.toFormat('YYYY-MM')
+const displayDate = computed(() => currentDate.value.toFormat('yyyy年M月'))
+const currentMonth = computed(() => currentDate.value.toFormat('yyyy-MM'))
 const youbi = ["日", "月", "火", "水", "木", "金", "土"]
 
 const startDate = computed(() => {
@@ -34,7 +34,7 @@ const calenders = computed(() => {
     for (let day = 0; day < 7; day++) {
       weekRow.push({
         date: date.day,
-        month: date.toFormat('YYYY-MM'),
+        month: date.toFormat('yyyy-MM'),
       });
       date = date.plus({days: 1})
     }
