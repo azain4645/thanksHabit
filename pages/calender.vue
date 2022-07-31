@@ -6,6 +6,12 @@ const displayDate = computed(() => currentDate.value.toFormat('yyyy年M月'))
 const currentMonth = computed(() => currentDate.value.toFormat('yyyy-MM'))
 const youbi = ["日", "月", "火", "水", "木", "金", "土"]
 
+const events = [
+  { date: "2022-07-02", count: 2},
+  { date: "2022-07-03", count: 3},
+  { date: "2022-07-04", count: 4},
+]
+
 const startDate = computed(() => {
   const newDt = currentDate.value.startOf("month")
   const youbiNum = newDt.weekday
@@ -32,16 +38,25 @@ const calenders = computed(() => {
   for (let week = 0; week < weekNumber; week++) {
     let weekRow = [];
     for (let day = 0; day < 7; day++) {
+      const thanksCount = getDayThanks(date)
       weekRow.push({
         date: date.day,
         month: date.toFormat('yyyy-MM'),
+        count: thanksCount
       });
       date = date.plus({days: 1})
     }
     calendars.push(weekRow)
   }
+  console.log(calendars);
   return calendars;
 });
+
+const getDayThanks = (date) => {
+  return events.find( event => {
+    return date.toFormat('yyyy-MM-dd') == event.date
+  })
+}
 
 const prevMonth = () => currentDate.value = currentDate.value.minus({ months: 1})
 const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
@@ -83,6 +98,8 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
         } border-r border-b border-gray-300 border-solid text-center`"
       >
         {{ day.date }}
+        {{ day.count }}
+
       </div>
     </div>
   </div>
