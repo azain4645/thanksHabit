@@ -1,3 +1,15 @@
+<script setup>
+  const showContent = ref(true)
+
+  const openModal = () => showContent.value = true
+  const closeModal = () => showContent.value = false
+</script>
+
 <template>
-  <h1>あいうえおaa</h1>
+  <button v-on:click="openModal" >Click</button>
+
+  <modal 
+    show-content="showContent"
+    @onClick="closeModal"  
+  /> 
 </template>
