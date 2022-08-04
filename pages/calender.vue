@@ -7,7 +7,7 @@ const currentMonth = computed(() => currentDate.value.toFormat('yyyy-MM'))
 const youbi = ["日", "月", "火", "水", "木", "金", "土"]
 
 const events = [
-  { date: "2022-08-02", count: 2},
+  { date: "2022-08-02", count: 12},
   { date: "2022-08-03", count: 3},
   { date: "2022-08-04", count: 4},
 ]
@@ -48,7 +48,7 @@ const calenders = computed(() => {
     }
     calendars.push(weekRow)
   }
-  console.log(calendars);
+  // console.log(calendars);
   return calendars;
 });
 
@@ -98,8 +98,9 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
         } border-r border-b border-gray-300 border-solid text-center`"
       >
         {{ day.date }}
-        <!-- {{ day.count }} -->
-        {{ JSON.stringify(day) }}
+        <p class="mt-2 text-6xl font-bold text-red-300">
+          {{ day.count?.count }}
+        </p>
 
       </div>
     </div>
