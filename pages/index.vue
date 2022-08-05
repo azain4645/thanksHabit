@@ -9,7 +9,9 @@
   <button v-on:click="openModal" >Click</button>
 
   <modal 
-    show-content="showContent"
-    @onClick="closeModal"  
-  /> 
+    :show-content="showContent"
+    @emitFunc="closeModal"  
+  >
+    これはテストコンポーネント
+  </modal>
 </template>
