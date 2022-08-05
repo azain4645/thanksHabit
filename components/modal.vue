@@ -3,20 +3,20 @@
     showContent: Boolean
   })
 
-  const emit = defineEmits(['emitFunc'])
+  const emit = defineEmits(['closeModal'])
 </script>
 
 <template>
   <div id="overlay" 
     v-show="showContent" 
-    @click="$emit('emitFunc')" 
+    @click="$emit('closeModal')" 
   >
     <div id="content">
       <p>
         <slot></slot>
       </p>
       <button 
-        @click="$emit('emitFunc')" 
+        @click="$emit('closeModal')" 
       >
         Close
       </button>

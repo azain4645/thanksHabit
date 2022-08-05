@@ -10,7 +10,7 @@
 
   <modal 
     :show-content="showContent"
-    @emitFunc="closeModal"  
+    @closeModal="closeModal"  
   >
     これはテストコンポーネント
   </modal>
