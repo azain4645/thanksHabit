@@ -1,6 +1,18 @@
 <script setup>
 import { DateTime } from "luxon";
 
+// モーダル
+const showModal = ref(true)
+const modalContent = ref('')
+
+const openModal = (count) => {
+  modalContent.value = count
+  showModal.value = true
+}
+
+const closeModal = () => showModal.value = false
+
+// カレンダー関係
 const currentDate = ref(DateTime.local());
 const displayDate = computed(() => currentDate.value.toFormat('yyyy年M月'))
 const currentMonth = computed(() => currentDate.value.toFormat('yyyy-MM'))
@@ -63,6 +75,13 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
 </script>
 
 <template>
+  <modal 
+    :show-content="showModal"
+    @closeModal="closeModal"  
+  >
+    {{ modalContent }}
+  </modal>
+
   <h2>カレンダー 
     {{ displayDate }}
   </h2>
@@ -88,7 +107,6 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
       :key="index" 
       class="flex border-l border-gray-300 border-solid"
     >
-    
       <div 
         v-for="(day, index) in week" 
         :key="index"
@@ -98,7 +116,10 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
         } border-r border-b border-gray-300 border-solid text-center`"
       >
         {{ day.date }}
-        <p class="mt-2 text-6xl font-bold text-red-300">
+        <p 
+          class="mt-2 text-6xl font-bold text-red-300"
+          @click="openModal(day.count?.count)"
+        >
           {{ day.count?.count }}
         </p>
 
