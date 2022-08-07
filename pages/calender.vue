@@ -6,6 +6,7 @@ const showModal = ref(true)
 const modalContent = ref('')
 
 const openModal = (count) => {
+  //　実際は日付を渡してデータを取得して表示
   modalContent.value = count
   showModal.value = true
 }
