@@ -1,10 +1,12 @@
 <script setup lang="ts">
-  import { addDoc, collection, getDocs, query } from 'firebase/firestore'
+  import { addDoc, collection, getDocs, doc, query, where, deleteDoc } from 'firebase/firestore'
+  import { DateTime } from "luxon";
+
   const { $firebaseDB } = useNuxtApp();
 
   const readFromFirestore = async () => {
     try {
-      const q = query(collection($firebaseDB, "2022-08-10"));
+      const q = query(collection($firebaseDB, Today));
       const querySnapshot = await getDocs(q);
       const Docs = <Thank[]>([])
       querySnapshot.forEach((doc) => {
@@ -26,7 +28,7 @@
       content: content.value
     }
     try {
-        await addDoc(collection($firebaseDB, "2022-08-10"), document)
+        await addDoc(collection($firebaseDB, Today), document)
         // alert("Success!")
         content.value = ''
         readFromFirestore()
@@ -34,6 +36,17 @@
       alert("Error!")
       console.error(e)
     }
+  }
+
+  const removeToFirestore = async (content) => {
+    const thnaksCollectionRef = collection($firebaseDB, Today);
+    const q = query(thnaksCollectionRef, where('content', '==', content));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach(async (document) => {
+      const thnakDocumentRef = doc($firebaseDB, Today, document.id);
+      await deleteDoc(thnakDocumentRef);
+    });
+    readFromFirestore()
   }
 
   type Thank = {
@@ -44,6 +57,8 @@
   onMounted(() => {
     readFromFirestore();
   })
+
+  const Today = DateTime.local().toFormat('yyyy-MM-dd')
 
   // const Thanks = ref<Thank[]>([
   //   {content: '生きている'},
@@ -57,7 +72,7 @@
   //   content.value = ""
   // }
 
-  const removeThank = (index : number) => Thanks.value.splice(index, 1)
+  // const removeThank = (index : number) => Thanks.value.splice(index, 1)
 
   const content = ref('')
 </script>
@@ -75,7 +90,7 @@
       {{ thank.content }}
       <button
         class="bg-blue-200 hover:bg-blue-400 w-16 h-5 rounded-md text-sm text-white ml-2"
-        @click="removeThank(index)"
+        @click="removeToFirestore(thank.content)"
       >
         取消し
       </button>

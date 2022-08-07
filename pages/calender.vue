@@ -2,7 +2,7 @@
 import { DateTime } from "luxon";
 
 // モーダル
-const showModal = ref(true)
+const showModal = ref(false)
 const modalContent = ref('')
 
 const openModal = (count) => {
