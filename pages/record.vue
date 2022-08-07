@@ -1,19 +1,61 @@
 <script setup lang="ts">
+  import { addDoc, collection, getDocs, query } from 'firebase/firestore'
+  const { $firebaseDB } = useNuxtApp();
+
+  const readFromFirestore = async () => {
+    try {
+      const q = query(collection($firebaseDB, "2022-08-10"));
+      const querySnapshot = await getDocs(q);
+      const Docs = <Thank[]>([])
+      querySnapshot.forEach((doc) => {
+        const addDoc = <Thank>{
+          content : doc.data().content
+        }
+        Docs.push(addDoc)
+      });
+      Thanks.value = Docs
+    } catch (e) {
+      alert("Error!")
+      console.error(e)
+    }
+  }
+
+  const writeToFirestore = async () => {
+    if(!content.value){ return }
+    const document = {
+      content: content.value
+    }
+    try {
+        await addDoc(collection($firebaseDB, "2022-08-10"), document)
+        // alert("Success!")
+        content.value = ''
+        readFromFirestore()
+    } catch (e) {
+      alert("Error!")
+      console.error(e)
+    }
+  }
+
   type Thank = {
     content: string;
   }
 
-  const Thanks = ref<Thank[]>([
-    {content: '生きている'},
-    {content: 'ご飯が美味しい！'},
-  ])
+  const Thanks = ref<Thank[]>([])
+  onMounted(() => {
+    readFromFirestore();
+  })
 
-  const addThank = () => {
-    Thanks.value.push({
-      content: content.value
-    })
-    content.value = ""
-  }
+  // const Thanks = ref<Thank[]>([
+  //   {content: '生きている'},
+  //   {content: 'ご飯が美味しい！'},
+  // ])
+
+  // const addThank = () => {
+  //   Thanks.value.push({
+  //     content: content.value
+  //   })
+  //   content.value = ""
+  // }
 
   const removeThank = (index : number) => Thanks.value.splice(index, 1)
 
@@ -42,7 +84,7 @@
 
   <form 
     class="flex"
-    @submit.prevent="addThank">
+    @submit.prevent="writeToFirestore">
     <input 
       v-model="content"
       type="text" 
