@@ -2,7 +2,6 @@
   const props = defineProps({
     showContent: Boolean
   })
-
   const emit = defineEmits(['closeModal'])
 </script>
 
