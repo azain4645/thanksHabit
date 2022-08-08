@@ -2,7 +2,19 @@
 import { DateTime, DayNumbers } from "luxon";
 import { getDocs, collection, Firestore } from 'firebase/firestore';
 
-/** サーバ側で初期化されるとエラーになるはずなので、初期化はmountedライフサイクルにて行う */
+/**
+ * サーバ側で初期化されるとエラーになるはずなので、初期化はmountedライフサイクルにて行う。
+ * 
+ * ### 補足
+ * 実運用時のビルド時には、ビルド設定によってはサーバ側なしとなるが、
+ * yarn dev 時には基本的にSSRで動作しているはずなので、
+ * この階層にFirestoreの初期化処理を書くと、「サーバ側での実行」になる可能性がある。
+ * 
+ * しかし、実際にはあくまで初期化設定を行いたいのは「サーバ側の」ではなく「フロントエンド」
+ * なので、ここでは初期化を行わず、フロントエンドで初期化を行う。
+ * 
+ * （そのために、onMountedを使う。なおmountedなどVueのライフサイクルについては公式ドキュメントをご覧ください）
+ */
 let $firebaseDB: Firestore;
 
 /**
