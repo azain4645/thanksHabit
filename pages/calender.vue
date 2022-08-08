@@ -1,6 +1,6 @@
 <script setup>
 import { DateTime } from "luxon";
-import { db, collection } from 'firebase/firestore'
+import { getDocs, collection } from 'firebase/firestore'
 
 const { $firebaseDB } = useNuxtApp();
 
@@ -48,7 +48,7 @@ const calenders = computed(() => {
   for (let week = 0; week < weekNumber; week++) {
     let weekRow = [];
     for (let day = 0; day < 7; day++) {
-      const thanksCount = getDayThanksFirebase(date)
+      const thanksCount = getDayThanksFirebase(date.toFormat('yyyy-MM'))
       weekRow.push({
         date: date.day,
         month: date.toFormat('yyyy-MM'),
@@ -75,8 +75,9 @@ const calenders = computed(() => {
 // }
 
 const getDayThanksFirebase = (date) => {
-
-  db.collection(date).get().then(snap => {
+  const collectionRef = collection($firebaseDB, date)
+  //console.log(collectionRef)
+  getDocs(collectionRef).then((snap) => {
     return snap.size
   })
 }
