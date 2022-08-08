@@ -76,6 +76,7 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
 </script>
 
 <template>
+<div>
   <modal 
     :show-content="showModal"
     @closeModal="closeModal"  
@@ -127,5 +128,5 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
       </div>
     </div>
   </div>
-
+</div>
 </template>
