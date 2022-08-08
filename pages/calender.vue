@@ -1,22 +1,42 @@
-<script setup lang="ts">
+<script setup lang="ts"> // <= TypeScriptで書きたい
 import { DateTime, DayNumbers } from "luxon";
 import { getDocs, collection, Firestore } from 'firebase/firestore';
 
+/** サーバ側で初期化されるとエラーになるはずなので、初期化はmountedライフサイクルにて行う */
 let $firebaseDB: Firestore;
-const calenders = ref<{
+
+/**
+ * カレンダーは初期化完了後に通信を行い、その後
+ * 非同期的にデータを取得するので、refとして定義する
+ */
+const calenders = ref<{ // <= 型は明確にしたい（anyは極力排除）
     date: DayNumbers;
     month: string;
     count: number;
 }[][]>([]);
-onMounted(async () => {
+
+// mountedライフサイクルで初期化を行う（mountedなら確実にサーバではなくフロントエンドでの実行になるはず）
+onMounted(async () => { // awaitを使いたいので非同期関数にする
   $firebaseDB = useNuxtApp().$firebaseDB;
 
   const weekNumber = Math.ceil(endDate.value.diff(startDate.value, 'days').days / 7);
 
+  // [...new Array(weekNumber)].map((_,i) => i) で weekNumberの数だけゼロ始まりの連番を生成
+  // ※ 配列初期化後にpush、という手続き的な実装より、関数らしく宣言的に実装したい
+  // ※ 配列初期化後にpushする形でも良いが、その場合には適切な型を明示しないとanyになる（anyは避けたい）
   const calendersPromise = [...new Array(weekNumber)].map((_,i) => i).map(async (i) => {
+
+    // ---- awaitを使いたいので非同期関数にする ----
+
+    // 同様のやり方でその週の初めから終わりまでの7日間を連番で回す
     const weekRowPromise = [...new Array(7)].map((_,j) => j).map(async (j) => {
+
+      // ---- awaitを使いたいので非同期関数にする ----
+
+      // let + 後から追加 というミュータブルなやり方ではなく、極力イミュータブルにしたい
       const date = startDate.value.plus({days: i*7 + j});
-      const thanksCount = await getDayThanksFirebase(date.toFormat('yyyy-MM-dd'))
+      // ここもとのコードでフォーマット間違ってました（ddがなかった）
+      const thanksCount = await getDayThanksFirebase(date.toFormat('yyyy-MM-dd'));
       const _day = {
         date: date.day,
         month: date.toFormat('yyyy-MM'),
@@ -24,9 +44,11 @@ onMounted(async () => {
       };
       return _day;
     })
+    // 並列的に日毎データを処理して、週データにまとめる（並列処理でないと処理に時間がかかる）
     const weekRow = await Promise.all(weekRowPromise);
     return weekRow;
   });
+  // 並列的に週毎データを処理して、月データにまとめる（並列処理でないと処理に時間がかかる）
   calenders.value = await Promise.all(calendersPromise);
 })
 
@@ -59,7 +81,8 @@ const startDate = computed(() => {
 const endDate = computed(() => {
   const endDt = currentDate.value.endOf("month")
   let youbiNum = endDt.weekday
-  //@ts-ignore //TODO 型定義上は、0 を型 WeekdayNumbers に割り当てることはできない
+  //@ts-ignore //TODO 型定義上は、0 を型 WeekdayNumbers に割り当てることはできないので、修正した方が良い
+  // ※上記の weekday をVSCode上で F12 で押して、さらに飛んだ先の「WeekdayNumbers」を F12 すると、型定義を見れます
   youbiNum == 7 ? youbiNum = 0 : youbiNum = youbiNum
   
   return endDt.plus({
@@ -80,9 +103,15 @@ const endDate = computed(() => {
 // }
 
 const getDayThanksFirebase = async (date) => {
+
+  // ---- await を使いたいので非同期関数にする ----
+
   const collectionRef = collection($firebaseDB, date)
   //console.log(collectionRef)
+
+  // getDocsはPromiseを返すので、結果が返ってくるまでawaitで待つ
   const result = await getDocs(collectionRef);
+  
   console.log({len: result.docs.length, date})
   return result.docs.length;
 }
