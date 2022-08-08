@@ -1,5 +1,8 @@
 <script setup>
 import { DateTime } from "luxon";
+import { db, collection } from 'firebase/firestore'
+
+const { $firebaseDB } = useNuxtApp();
 
 // モーダル
 const showModal = ref(false)
@@ -18,12 +21,6 @@ const currentDate = ref(DateTime.local());
 const displayDate = computed(() => currentDate.value.toFormat('yyyy年M月'))
 const currentMonth = computed(() => currentDate.value.toFormat('yyyy-MM'))
 const youbi = ["日", "月", "火", "水", "木", "金", "土"]
-
-const events = [
-  { date: "2022-08-02", count: 12},
-  { date: "2022-08-03", count: 3},
-  { date: "2022-08-04", count: 4},
-]
 
 const startDate = computed(() => {
   const newDt = currentDate.value.startOf("month")
@@ -51,7 +48,7 @@ const calenders = computed(() => {
   for (let week = 0; week < weekNumber; week++) {
     let weekRow = [];
     for (let day = 0; day < 7; day++) {
-      const thanksCount = getDayThanks(date)
+      const thanksCount = getDayThanksFirebase(date)
       weekRow.push({
         date: date.day,
         month: date.toFormat('yyyy-MM'),
@@ -65,9 +62,22 @@ const calenders = computed(() => {
   return calendars;
 });
 
-const getDayThanks = (date) => {
-  return events.find( event => {
-    return date.toFormat('yyyy-MM-dd') == event.date
+// const events = [
+//   { date: "2022-08-02", count: 12},
+//   { date: "2022-08-03", count: 3},
+//   { date: "2022-08-04", count: 4},
+// ]
+
+// const getDayThanks = (date) => {
+//   return events.find( event => {
+//     return date.toFormat('yyyy-MM-dd') == event.date
+//   })
+// }
+
+const getDayThanksFirebase = (date) => {
+
+  db.collection(date).get().then(snap => {
+    return snap.size
   })
 }
 
@@ -120,9 +130,9 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
         {{ day.date }}
         <p 
           class="mt-2 text-6xl font-bold text-red-300"
-          @click="openModal(day.count?.count)"
+          @click="openModal(day.count)"
         >
-          {{ day.count?.count }}
+          {{ day.count }}
         </p>
 
       </div>
