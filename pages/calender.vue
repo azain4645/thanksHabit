@@ -1,8 +1,34 @@
-<script setup>
-import { DateTime } from "luxon";
-import { getDocs, collection } from 'firebase/firestore'
+<script setup lang="ts">
+import { DateTime, DayNumbers } from "luxon";
+import { getDocs, collection, Firestore } from 'firebase/firestore';
 
-const { $firebaseDB } = useNuxtApp();
+let $firebaseDB: Firestore;
+const calenders = ref<{
+    date: DayNumbers;
+    month: string;
+    count: number;
+}[][]>([]);
+onMounted(async () => {
+  $firebaseDB = useNuxtApp().$firebaseDB;
+
+  const weekNumber = Math.ceil(endDate.value.diff(startDate.value, 'days').days / 7);
+
+  const calendersPromise = [...new Array(weekNumber)].map((_,i) => i).map(async (i) => {
+    const weekRowPromise = [...new Array(7)].map((_,j) => j).map(async (j) => {
+      const date = startDate.value.plus({days: i*7 + j});
+      const thanksCount = await getDayThanksFirebase(date.toFormat('yyyy-MM-dd'))
+      const _day = {
+        date: date.day,
+        month: date.toFormat('yyyy-MM'),
+        count: thanksCount
+      };
+      return _day;
+    })
+    const weekRow = await Promise.all(weekRowPromise);
+    return weekRow;
+  });
+  calenders.value = await Promise.all(calendersPromise);
+})
 
 // モーダル
 const showModal = ref(false)
@@ -33,33 +59,12 @@ const startDate = computed(() => {
 const endDate = computed(() => {
   const endDt = currentDate.value.endOf("month")
   let youbiNum = endDt.weekday
+  //@ts-ignore //TODO 型定義上は、0 を型 WeekdayNumbers に割り当てることはできない
   youbiNum == 7 ? youbiNum = 0 : youbiNum = youbiNum
   
   return endDt.plus({
     days: 6 - youbiNum
   })
-});
-
-const calenders = computed(() => {
-  const weekNumber = Math.ceil(endDate.value.diff(startDate.value, 'days').days / 7);
-  let date = startDate.value
-
-  let calendars = [];
-  for (let week = 0; week < weekNumber; week++) {
-    let weekRow = [];
-    for (let day = 0; day < 7; day++) {
-      const thanksCount = getDayThanksFirebase(date.toFormat('yyyy-MM'))
-      weekRow.push({
-        date: date.day,
-        month: date.toFormat('yyyy-MM'),
-        count: thanksCount
-      });
-      date = date.plus({days: 1})
-    }
-    calendars.push(weekRow)
-  }
-  // console.log(calendars);
-  return calendars;
 });
 
 // const events = [
@@ -74,12 +79,12 @@ const calenders = computed(() => {
 //   })
 // }
 
-const getDayThanksFirebase = (date) => {
+const getDayThanksFirebase = async (date) => {
   const collectionRef = collection($firebaseDB, date)
   //console.log(collectionRef)
-  getDocs(collectionRef).then((snap) => {
-    return snap.size
-  })
+  const result = await getDocs(collectionRef);
+  console.log({len: result.docs.length, date})
+  return result.docs.length;
 }
 
 const prevMonth = () => currentDate.value = currentDate.value.minus({ months: 1})
