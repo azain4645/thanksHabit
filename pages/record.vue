@@ -1,14 +1,16 @@
 <script setup lang="ts">
-  import { addDoc, collection, getDocs, doc, query, where, deleteDoc } from 'firebase/firestore'
+  import { addDoc, collection, getDocs, doc, query, where, deleteDoc, orderBy } from 'firebase/firestore'
   import { DateTime } from "luxon";
 
   const { $firebaseDB } = useNuxtApp();
 
   const readFromFirestore = async () => {
     try {
-      const q = query(collection($firebaseDB, Today));
+      const q = query(collection($firebaseDB, Today), orderBy('created_at', 'asc'));
+
       const querySnapshot = await getDocs(q);
       const Docs = <Thank[]>([])
+      
       querySnapshot.forEach((doc) => {
         const addDoc = <Thank>{
           content : doc.data().content
@@ -25,7 +27,8 @@
   const writeToFirestore = async () => {
     if(!content.value){ return }
     const document = {
-      content: content.value
+      content: content.value,
+      created_at: formatedNow(),
     }
     try {
         await addDoc(collection($firebaseDB, Today), document)
@@ -51,6 +54,7 @@
 
   type Thank = {
     content: string;
+    created_at: string;
   }
 
   const Thanks = ref<Thank[]>([])
@@ -59,6 +63,16 @@
   })
 
   const Today = DateTime.local().toFormat('yyyy-MM-dd')
+
+  const formatedNow = () : string => {
+    const d = new Date()
+    return d.getFullYear()
+            + '-' + ('00' + (d.getMonth() + 1)).slice(-2)
+            + '-' + ('00' + d.getDate()).slice(-2)
+            + ' ' + ('00' + d.getHours()).slice(-2)
+            + ':' + ('00' + d.getMinutes()).slice(-2)
+            + ':' + ('00' + d.getSeconds()).slice(-2);
+  }
 
   // const Thanks = ref<Thank[]>([
   //   {content: '生きている'},
