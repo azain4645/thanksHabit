@@ -14,12 +14,14 @@
     @click="$emit('closeModal')" 
   >
     <div id="content">
-      <ul>
+      <p class="listTitle">感謝リスト</p>
+      <ol>
         <li v-for="comment in thanks" :key="comment">
           {{ comment }}
         </li>
-      </ul>
+      </ol>
       <button 
+        class="mt-5 text-white font-semibold rounded-lg shadow-md modal-button"
         @click="$emit('closeModal')" 
       >
         Close
@@ -52,5 +54,48 @@
   width:50%;
   padding: 1em;
   background:#fff;
+}
+
+.listTitle{
+  font-weight: bold;
+  font-size: 20px;
+  color: #F6A38B;
+}
+
+.modal-button{
+  background-color: #F6A38B;
+  width: 100%;
+}
+
+ol{
+  counter-reset:list;
+  list-style-type:none;
+}
+
+ol li{
+  position:relative;
+  line-height: 30px;
+  margin: 7px 0 7px 40px;
+  padding-left: 10px;
+  font-weight: bold;
+  font-size:14px;
+}
+  
+ol li:before{
+  counter-increment: list;
+  content: counter(list);
+  position: absolute;
+  left: -35px;
+  width: 30px;
+  height: 30px;
+  background: #F6A38B;
+  text-align: center;
+  color: #fff;
+  top: 50%;
+  -moz-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
 }
 </style>

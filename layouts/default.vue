@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col w-full h-screen">
-    <header class="text-white bg-blue-500 p-4 flex">
+    <header class="text-white bg-red-300 p-4 flex">
       <h3 class="mr-5">感謝日記</h3>
       <ul class="text-left flex">
         <NuxtLink :to="`/record`">

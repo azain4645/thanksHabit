@@ -74,20 +74,6 @@
             + ':' + ('00' + d.getSeconds()).slice(-2);
   }
 
-  // const Thanks = ref<Thank[]>([
-  //   {content: '生きている'},
-  //   {content: 'ご飯が美味しい！'},
-  // ])
-
-  // const addThank = () => {
-  //   Thanks.value.push({
-  //     content: content.value
-  //   })
-  //   content.value = ""
-  // }
-
-  // const removeThank = (index : number) => Thanks.value.splice(index, 1)
-
   const content = ref('')
 </script>
 
@@ -95,24 +81,23 @@
   <div class="m-4">
   <p class="mb-3">今日の感謝を思い出して記録しよう</p>
 
-  <ul class="mb-2">
+  <ol class="mb-2">
     <li
      v-for="(thank, index) in Thanks" :key="index"
      class="mb-1"
     >
-      {{ index + 1 }}
       {{ thank.content }}
       <button
-        class="bg-blue-200 hover:bg-blue-400 w-16 h-5 rounded-md text-sm text-white ml-2"
+        class="bg-red-200 hover:bg-red-400 w-16 h-5 rounded-md text-sm text-white ml-2"
         @click="removeToFirestore(thank.content)"
       >
         取消し
       </button>
     </li>
-  </ul>
+  </ol>
 
   <form 
-    class="flex"
+    class="flex mt-5"
     @submit.prevent="writeToFirestore">
     <input 
       v-model="content"
@@ -123,8 +108,8 @@
       :disabled= "content == ''"
       :class="`${
         content !== ''
-        ? 'bg-blue-500 hover:bg-blue-700'
-        : 'bg-blue-300'
+        ? 'bg-red-300 hover:bg-red-500'
+        : 'bg-red-300'
       } ml-5 w-32  text-white font-semibold rounded-lg shadow-md`">
       記録
     </button>
@@ -132,3 +117,37 @@
   </div>
 
 </template>
+
+<style scoped>
+ol{
+  counter-reset:list;
+  list-style-type:none;
+}
+
+ol li{
+  position:relative;
+  line-height: 30px;
+  margin: 7px 0 7px 40px;
+  padding-left: 10px;
+  font-weight: bold;
+  font-size:14px;
+}
+  
+ol li:before{
+  counter-increment: list;
+  content: counter(list);
+  position: absolute;
+  left: -35px;
+  width: 30px;
+  height: 30px;
+  background: #F6A38B;
+  text-align: center;
+  color: #fff;
+  top: 50%;
+  -moz-transform: translateY(-50%);
+  -webkit-transform: translateY(-50%);
+  -o-transform: translateY(-50%);
+  -ms-transform: translateY(-50%);
+  transform: translateY(-50%);
+}
+</style>
