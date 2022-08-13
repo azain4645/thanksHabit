@@ -66,14 +66,36 @@ onMounted(async () => { // awaitを使いたいので非同期関数にする
   calenders.value = await Promise.all(calendersPromise);
 })
 
+onUpdated(async () => { 
+
+  const weekNumber = Math.ceil(endDate.value.diff(startDate.value, 'days').days / 7);
+  const calendersPromise = [...new Array(weekNumber)].map((_,i) => i).map(async (i) => {
+
+    const weekRowPromise = [...new Array(7)].map((_,j) => j).map(async (j) => {
+      const date = startDate.value.plus({days: i*7 + j});
+      const thanksCount = await getThanksCountFirebase(date.toFormat('yyyy-MM-dd'));
+      const _day = {
+        day: date.day,
+        month: date.toFormat('yyyy-MM'),
+        date: date.toFormat('yyyy-MM-dd'),
+        count: thanksCount
+      };
+      return _day;
+    })
+    // 並列的に日毎データを処理して、週データにまとめる（並列処理でないと処理に時間がかかる）
+    const weekRow = await Promise.all(weekRowPromise);
+    return weekRow;
+  });
+  // 並列的に週毎データを処理して、月データにまとめる（並列処理でないと処理に時間がかかる）
+  calenders.value = await Promise.all(calendersPromise);
+})
+
 // モーダル
 const showModal = ref(false)
 const modalContent = ref<String[]>([])
 
 const openModal = async (date) => {
   //　実際は日付を渡してデータを取得して表示
-  // modalContent.value = date
-
   modalContent.value = await getDayThanksFirebase(date);
 
   showModal.value = true
@@ -146,11 +168,24 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
     {{ modalContent }}
   </show-thanks-modal>
 
-  <h2>カレンダー 
-    {{ displayDate }}
-  </h2>
-  <button @click="prevMonth">前の月</button>
-  <button @click="nextMonth">次の月</button>
+  <div class="flex justify-center mb-2">
+    <button 
+      class="mr-3"
+      @click="prevMonth"
+    >
+      前の月
+    </button>
+    <h2> 
+      {{ displayDate }}
+    </h2>
+    <button
+     class="ml-3"
+     @click="nextMonth"
+    >
+      次の月
+    </button>
+  </div>
+
 
   <div 
     style="margin:auto;max-width:900px;"

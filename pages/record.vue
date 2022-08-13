@@ -1,8 +1,14 @@
 <script setup lang="ts">
-  import { addDoc, collection, getDocs, doc, query, where, deleteDoc, orderBy } from 'firebase/firestore'
+
+  import { Firestore, addDoc, collection, getDocs, doc, query, where, deleteDoc, orderBy } from 'firebase/firestore'
   import { DateTime } from "luxon";
 
-  const { $firebaseDB } = useNuxtApp();
+  // const { $firebaseDB } = useNuxtApp();
+  let $firebaseDB: Firestore;
+
+  onMounted(() => { // awaitを使いたいので非同期関数にする
+    $firebaseDB = useNuxtApp().$firebaseDB;
+  })
 
   const readFromFirestore = async () => {
     try {
