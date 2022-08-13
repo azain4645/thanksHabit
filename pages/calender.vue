@@ -23,6 +23,7 @@ let $firebaseDB: Firestore;
  */
 const calenders = ref<{ // <= 型は明確にしたい（anyは極力排除）
     date: DayNumbers;
+    day: string;
     month: string;
     count: number;
 }[][]>([]);
@@ -48,10 +49,11 @@ onMounted(async () => { // awaitを使いたいので非同期関数にする
       // let + 後から追加 というミュータブルなやり方ではなく、極力イミュータブルにしたい
       const date = startDate.value.plus({days: i*7 + j});
       // ここもとのコードでフォーマット間違ってました（ddがなかった）
-      const thanksCount = await getDayThanksFirebase(date.toFormat('yyyy-MM-dd'));
+      const thanksCount = await getThanksCountFirebase(date.toFormat('yyyy-MM-dd'));
       const _day = {
-        date: date.day,
+        day: date.day,
         month: date.toFormat('yyyy-MM'),
+        date: date.toFormat('yyyy-MM-dd'),
         count: thanksCount
       };
       return _day;
@@ -66,11 +68,14 @@ onMounted(async () => { // awaitを使いたいので非同期関数にする
 
 // モーダル
 const showModal = ref(false)
-const modalContent = ref('')
+const modalContent = ref<String[]>([])
 
-const openModal = (count) => {
+const openModal = async (date) => {
   //　実際は日付を渡してデータを取得して表示
-  modalContent.value = count
+  // modalContent.value = date
+
+  modalContent.value = await getDayThanksFirebase(date);
+
   showModal.value = true
 }
 
@@ -102,10 +107,9 @@ const endDate = computed(() => {
   })
 });
 
-const getDayThanksFirebase = async (date) => {
+const getThanksCountFirebase = async (date) => {
 
   // ---- await を使いたいので非同期関数にする ----
-
   const collectionRef = collection($firebaseDB, date)
   //console.log(collectionRef)
 
@@ -117,18 +121,30 @@ const getDayThanksFirebase = async (date) => {
   return count == 0 ? "" : count;
 }
 
+const getDayThanksFirebase = async (date) => {
+  const q = (collection($firebaseDB, date));
+  const querySnapshot = await getDocs(q);
+  const Docs = <String[]>([])
+  querySnapshot.forEach((doc) => {
+    Docs.push(doc.data().content)
+  });
+
+  return Docs
+}
+
 const prevMonth = () => currentDate.value = currentDate.value.minus({ months: 1})
 const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
 </script>
 
 <template>
 <div>
-  <modal 
+  <show-thanks-modal 
     :show-content="showModal"
+    :thanks="modalContent"
     @closeModal="closeModal"  
   >
     {{ modalContent }}
-  </modal>
+  </show-thanks-modal>
 
   <h2>カレンダー 
     {{ displayDate }}
@@ -163,10 +179,10 @@ const nextMonth = () => currentDate.value = currentDate.value.plus({ months: 1})
           currentMonth != day.month ? 'bg-gray-100' : ''
         } border-r border-b border-gray-300 border-solid text-center`"
       >
-        {{ day.date }}
+        {{ day.day }}
         <p 
           class="mt-2 text-6xl font-bold text-red-300"
-          @click="openModal(day.count)"
+          @click="openModal(day.date)"
         >
           {{ day.count }}
         </p>
