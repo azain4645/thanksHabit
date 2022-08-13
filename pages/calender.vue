@@ -102,18 +102,6 @@ const endDate = computed(() => {
   })
 });
 
-// const events = [
-//   { date: "2022-08-02", count: 12},
-//   { date: "2022-08-03", count: 3},
-//   { date: "2022-08-04", count: 4},
-// ]
-
-// const getDayThanks = (date) => {
-//   return events.find( event => {
-//     return date.toFormat('yyyy-MM-dd') == event.date
-//   })
-// }
-
 const getDayThanksFirebase = async (date) => {
 
   // ---- await を使いたいので非同期関数にする ----
@@ -124,8 +112,9 @@ const getDayThanksFirebase = async (date) => {
   // getDocsはPromiseを返すので、結果が返ってくるまでawaitで待つ
   const result = await getDocs(collectionRef);
   
-  console.log({len: result.docs.length, date})
-  return result.docs.length;
+  // console.log({len: result.docs.length, date})
+  const count = result.docs.length;
+  return count == 0 ? "" : count;
 }
 
 const prevMonth = () => currentDate.value = currentDate.value.minus({ months: 1})
